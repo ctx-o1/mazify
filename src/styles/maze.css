@@ -1,0 +1,147 @@
+.canvas-holder {
+  position: relative;
+  width: 100%;
+  height: clamp(360px, 48vw, 440px);
+  min-height: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 0;
+  background: var(--plate);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition:
+    opacity 0.35s ease,
+    filter 0.2s ease;
+}
+body.has-image canvas {
+  opacity: 1;
+}
+canvas.developed {
+  animation: develop 0.65s ease both;
+}
+@keyframes develop {
+  from {
+    opacity: 0.35;
+    filter: blur(4px);
+    transform: scale(0.995);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+.dropzone {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.25s ease;
+}
+.dropzone-inner {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  color: var(--muted);
+  text-align: center;
+  padding: 32px;
+}
+.dropzone-copy {
+  display: grid;
+  gap: 8px;
+}
+.dropzone-copy strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dropzone-copy small {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.dropzone.drag {
+  background: rgba(255, 255, 252, 0.2);
+}
+body.has-image .dropzone {
+  pointer-events: none;
+  opacity: 0;
+}
+body.has-image .image-card.drag .dropzone {
+  opacity: 1;
+  background: rgba(240, 236, 223, 0.78);
+}
+.image-card.drag .canvas-holder {
+  background: #cec8b9;
+}
+#fileInput {
+  display: none;
+}
+
+.wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 68%
+  );
+  background-size: 240% 100%;
+  opacity: 0;
+}
+.wash.run {
+  animation: wash 0.7s ease both;
+}
+@keyframes wash {
+  0% {
+    opacity: 0;
+    background-position: 120% 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: -40% 0;
+  }
+}
+
+.busy-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(216, 212, 200, 0.72);
+  color: var(--muted);
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  backdrop-filter: blur(5px);
+}
+.busy-veil.show {
+  opacity: 1;
+}
+
+@media (max-width: 620px) {
+  .canvas-holder {
+    height: min(72vw, 390px);
+    min-height: 0;
+    border-radius: 0;
+  }
+}

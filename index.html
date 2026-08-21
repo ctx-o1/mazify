@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mazify Images</title>
+    <meta
+      name="description"
+      content="Turn any image into a detailed, printable generative maze with adjustable grid, contrast, color, and solution controls."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#262321" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="%BASE_URL%favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="shortcut icon" href="%BASE_URL%favicon.ico" />
+    <link rel="canonical" href="https://ctx-o1.github.io/mazify/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mazify" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Mazify | Image Maze Generator" />
+    <meta
+      property="og:description"
+      content="Turn any image into a detailed, printable generative maze."
+    />
+    <meta property="og:url" content="https://ctx-o1.github.io/mazify/" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Mazify | Image Maze Generator" />
+    <meta
+      name="twitter:description"
+      content="Turn any image into a detailed, printable generative maze."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Mazify",
+        "url": "https://ctx-o1.github.io/mazify/",
+        "description": "Turn any image into a detailed, printable generative maze with adjustable controls.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any"
+      }
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <nav class="site-tools" aria-label="Appearance and project links">
+      <button
+        class="theme-switcher"
+        id="themeBtn"
+        type="button"
+        aria-label="Switch to Charcoal Contact Sheet theme"
+        title="Switch to Charcoal Contact Sheet"
+      ></button>
+      <a
+        class="btn github-link"
+        href="https://github.com/ctx-o1/mazify"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="View Mazify on GitHub"
+      >
+        <span>GitHub</span>
+      </a>
+    </nav>
+
+    <main class="app">
+      <section
+        class="image-card"
+        id="imageCard"
+        aria-label="Image maze workspace"
+      >
+        <div class="canvas-holder">
+          <canvas id="mazeCanvas"></canvas>
+          <div
+            class="dropzone"
+            id="dropzone"
+            tabindex="0"
+            role="button"
+            aria-label="Choose an image"
+          >
+            <div class="dropzone-inner">
+              <div class="dropzone-copy">
+                <strong>Choose an image</strong>
+                <small>or drop it here</small>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" />
+          <div class="wash" id="wash"></div>
+          <div class="busy-veil" id="busyVeil">Creating maze…</div>
+        </div>
+
+        <div class="toolbar" aria-label="Maze controls">
+          <button class="btn" id="replaceBtn" type="button">Replace</button>
+
+          <details class="adjustments" id="adjustments">
+            <summary class="btn">Adjust</summary>
+            <div class="settings-popover">
+              <div class="field">
+                <div class="field-label">
+                  <label for="colsRange">Grid</label><b id="colsVal">36</b>
+                </div>
+                <input
+                  type="range"
+                  id="colsRange"
+                  min="10"
+                  max="56"
+                  step="1"
+                  value="36"
+                />
+              </div>
+              <div class="field">
+                <div class="field-label">
+                  <label for="resRange">Detail</label><b id="resVal">5</b>
+                </div>
+                <input
+                  type="range"
+                  id="resRange"
+                  min="2"
+                  max="7"
+                  step="1"
+                  value="5"
+                />
+              </div>
+              <div class="field">
+                <div class="field-label">
+                  <label for="contrastRange">Contrast</label
+                  ><b id="contrastVal">1.0</b>
+                </div>
+                <input
+                  type="range"
+                  id="contrastRange"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value="1"
+                />
+              </div>
+              <div class="toggle-grid">
+                <div class="toggle-row">
+                  <label for="invertToggle">Invert tones</label>
+                  <div class="switch">
+                    <input type="checkbox" id="invertToggle" />
+                    <div class="track"></div>
+                    <div class="knob"></div>
+                  </div>
+                </div>
+                <div class="toggle-row">
+                  <label for="solutionToggle">Show solution</label>
+                  <div class="switch">
+                    <input type="checkbox" id="solutionToggle" />
+                    <div class="track"></div>
+                    <div class="knob"></div>
+                  </div>
+                </div>
+                <div class="toggle-row">
+                  <label for="structureToggle">Show structure</label>
+                  <div class="switch">
+                    <input type="checkbox" id="structureToggle" />
+                    <div class="track"></div>
+                    <div class="knob"></div>
+                  </div>
+                </div>
+                <div class="toggle-row">
+                  <label for="colorToggle">Source colors</label>
+                  <div class="switch">
+                    <input type="checkbox" id="colorToggle" checked />
+                    <div class="track"></div>
+                    <div class="knob"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <button class="btn" id="regenBtn" type="button" disabled>New</button>
+          <button class="btn" id="copyBtn" type="button" disabled>Copy</button>
+          <button class="btn primary" id="downloadBtn" type="button" disabled>
+            PRINT
+          </button>
+          <span
+            class="visually-hidden"
+            id="copyStatus"
+            role="status"
+            aria-live="polite"
+          ></span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
