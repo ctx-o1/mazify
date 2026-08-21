@@ -20,6 +20,8 @@ Mazify samples the image into a brightness grid. Each sampled region becomes a v
 
 
 
+
+
 ## Running locally
 
 ```bash
@@ -28,6 +30,11 @@ cd mazify
 npm install
 npm run dev
 ```
+
+
+## References
+
+This maze generation method is based on H. Hernán Moraldo's [Method for generating mazes from images](https://web.archive.org/web/20260307222210/http://www.hernan.moraldo.com.ar/mazegeneration.htm), first published in 2009.
 
 
 ## License
