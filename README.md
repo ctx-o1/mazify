@@ -1,6 +1,6 @@
 # Mazify
 
-Turn any image into a detailed, printable generative maze.
+Turn any image into a detailed, printable maze.
 
 **[Try mazify](https://ctx-o1.github.io/mazify/)**
 
