@@ -1,8 +1,35 @@
-# mazify
+# Mazify
 
-Generating Mazes from Images
+Turn any image into a detailed, printable generative maze.
+
+**[Try mazify](https://ctx-o1.github.io/mazify/)**
+
+![A colored maze generated from a landscape image](example.png)
+
+Mazify samples the image into a brightness grid. Each sampled region becomes a variable-resolution graph: darker areas contain more nodes, while lighter areas contain fewer.
 
 
-![alt text](<example.png>)
+- Generate mazes from any browser-supported image
+- Preserve image details using adaptive maze density
+- Adjust grid size, detail, and contrast
+- Invert light and dark regions
+- Render with source-image colors
+- Reveal the underlying structure and solution
+- Generate alternate maze layouts from the same image
+- Copy or export a high-resolution PNG
 
 
+
+## Running locally
+
+```bash
+git clone https://github.com/ctx-o1/mazify.git
+cd mazify
+npm install
+npm run dev
+```
+
+
+## License
+
+[MIT License](LICENSE)
