@@ -65,6 +65,7 @@ summary:focus-visible {
 
 .app {
   width: min(500px, 100%);
+  min-width: 0;
 }
 
 .image-card {
