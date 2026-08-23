@@ -1,7 +1,8 @@
 .canvas-holder {
   position: relative;
-  width: 100%;
+  width: calc(100% - clamp(16px, 3vw, 28px));
   height: clamp(360px, 48vw, 440px);
+  margin: clamp(8px, 1.5vw, 14px) auto 0;
   min-height: 0;
   flex: 0 0 auto;
   overflow: hidden;
@@ -140,7 +141,9 @@ body.has-image .image-card.drag .dropzone {
 
 @media (max-width: 620px) {
   .canvas-holder {
+    width: calc(100% - 16px);
     height: min(72vw, 390px);
+    margin-top: 8px;
     min-height: 0;
     border-radius: 0;
   }

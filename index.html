@@ -55,6 +55,20 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
+    <svg
+      class="svg-definitions"
+      width="0"
+      height="0"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <clipPath id="maze-card-clip" clipPathUnits="objectBoundingBox">
+          <path id="mazeCardClip" d="M 0 0 H 1 V 1 H 0 Z" />
+        </clipPath>
+      </defs>
+    </svg>
+
     <nav class="site-tools" aria-label="Appearance and project links">
       <button
         class="theme-switcher"

@@ -1,6 +1,7 @@
 const elementIds = [
   "themeBtn",
   "imageCard",
+  "mazeCardClip",
   "dropzone",
   "fileInput",
   "replaceBtn",

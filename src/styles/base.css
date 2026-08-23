@@ -64,8 +64,42 @@ summary:focus-visible {
 }
 
 .app {
+  position: relative;
+  isolation: isolate;
   width: min(500px, 100%);
   min-width: 0;
+  filter:
+    drop-shadow(0 30px 48px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+}
+
+.app::before,
+.app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  clip-path: url("#maze-card-clip");
+}
+
+.app::before {
+  z-index: -2;
+  background: #100f0e;
+  transform: translate(9px, 9px);
+  opacity: 0.78;
+}
+
+.app::after {
+  z-index: -1;
+  background: var(--accent);
+  transform: translate(-4px, 4px);
+  opacity: 0.62;
+}
+
+.svg-definitions {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .image-card {
@@ -93,9 +127,20 @@ summary:focus-visible {
     ),
     var(--paper);
   border-radius: 2px;
+  clip-path: polygon(
+    3% 0,
+    97% 0,
+    100% 4%,
+    100% 96%,
+    97% 100%,
+    3% 100%,
+    0 96%,
+    0 4%
+  );
+  clip-path: url("#maze-card-clip");
   display: flex;
   flex-direction: column;
-  padding: clamp(16px, 2.8vw, 22px);
+  padding: clamp(24px, 3vw, 30px);
 }
 .image-card::before {
   content: "";
@@ -244,7 +289,7 @@ summary:focus-visible {
   .image-card {
     min-height: 78vh;
     border-radius: 2px;
-    padding: 12px;
+    padding: 20px;
   }
 }
 

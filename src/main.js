@@ -20,6 +20,7 @@ import {
   setControlsEnabled,
   showCopyFeedback,
 } from "./controls.js";
+import { renderMazeEdge } from "./edge.js";
 
 const controls = getControls();
 const state = {
@@ -35,8 +36,14 @@ const THEME_NAMES = {
   charcoal: "Charcoal Contact Sheet",
 };
 const BUILD_DELAY_MS = 20;
+const EDGE_RESIZE_DELAY_MS = 120;
 
 let buildTimer;
+let edgeResizeTimer;
+
+function rebuildEdge() {
+  renderMazeEdge(controls.mazeCardClip, controls.imageCard);
+}
 
 function draw() {
   if (!state.maze) return;
@@ -197,8 +204,14 @@ bindControls(controls, {
   onThemeChange: toggleTheme,
 });
 
-window.addEventListener("resize", draw);
+controls.regenBtn.addEventListener("click", rebuildEdge);
+window.addEventListener("resize", () => {
+  draw();
+  clearTimeout(edgeResizeTimer);
+  edgeResizeTimer = setTimeout(rebuildEdge, EDGE_RESIZE_DELAY_MS);
+});
 applyTheme(savedTheme());
 document.body.classList.add("has-image");
 setControlsEnabled(controls, false);
+rebuildEdge();
 rebuild({ newSeed: true });
