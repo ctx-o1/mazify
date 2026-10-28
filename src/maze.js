@@ -144,7 +144,17 @@ function buildGraph(brightness, cols, rows, opts) {
   const exitId =
     cellNodeIndex[rows - 1][cols - 1][lastCellRes - 1][lastCellRes - 1];
 
-  return { nodes, adjacency, allEdges, cols, rows, entranceId, exitId };
+  return {
+    nodes,
+    adjacency,
+    allEdges,
+    cellRes,
+    cellNodeIndex,
+    cols,
+    rows,
+    entranceId,
+    exitId,
+  };
 }
 
 function carveMaze(graph, startId, rng) {
@@ -219,7 +229,7 @@ function carveAndSolve(graph, seed) {
 // ============================================================
 // source -> brightness grid
 // ============================================================
-function sampleSource(source, cols, rows) {
+function sampleSource(source, cols, rows, colorForPixel) {
   const tmp = document.createElement("canvas");
   tmp.width = cols;
   tmp.height = rows;
@@ -242,6 +252,11 @@ function sampleSource(source, cols, rows) {
       const blue = data[idx + 2];
       const lum = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
       brightnessRow.push(lum);
+
+      if (colorForPixel) {
+        colorRow.push(colorForPixel(red, green, blue));
+        continue;
+      }
 
       const targetLum = Math.min(150, Math.max(46, lum * 190));
       const scale = targetLum / Math.max(1, lum * 255);
@@ -281,8 +296,10 @@ export function createMaze(source, options, seed = randomSeed()) {
     6,
     Math.min(72, Math.round(cols * sourceAspectRatio(source))),
   );
-  const sampled = sampleSource(source, cols, rows);
+  const sampled = sampleSource(source, cols, rows, options.colorForPixel);
   const graph = buildGraph(sampled.brightness, cols, rows, options);
+  if (options.entry) graph.entranceId = nearestNode(graph, options.entry);
+  if (options.exit) graph.exitId = nearestNode(graph, options.exit);
   const { treeEdges, solutionEdges } = carveAndSolve(graph, seed);
 
   return {
@@ -292,8 +309,26 @@ export function createMaze(source, options, seed = randomSeed()) {
     solutionEdges,
     cols,
     rows,
+    minRes: options.minRes,
+    maxRes: options.maxRes,
     seed,
   };
+}
+
+// Entry and exit positions are fractions of the source image.
+function nearestNode(graph, point) {
+  const x = point.x * graph.cols;
+  const y = point.y * graph.rows;
+  let best = 0;
+  let bestDistance = Infinity;
+  graph.nodes.forEach((node, id) => {
+    const distance = (node.x - x) ** 2 + (node.y - y) ** 2;
+    if (distance < bestDistance) {
+      best = id;
+      bestDistance = distance;
+    }
+  });
+  return best;
 }
 
 export function recarveMaze(maze, seed = randomSeed()) {
@@ -302,7 +337,7 @@ export function recarveMaze(maze, seed = randomSeed()) {
   return { ...maze, treeEdges, solutionEdges, seed };
 }
 
-function cssVar(name) {
+export function cssVar(name) {
   return getComputedStyle(document.documentElement)
     .getPropertyValue(name)
     .trim();
@@ -322,7 +357,7 @@ function sourceColorForEdge(maze, a, b) {
   return maze.colors[row][col];
 }
 
-function strokeMazeEdges(
+export function strokeMazeEdges(
   ctx,
   maze,
   edges,
@@ -367,7 +402,7 @@ function strokeMazeEdges(
   }
 }
 
-function drawStructure(ctx, maze, cellSize, lineWidth) {
+export function drawStructure(ctx, maze, cellSize, lineWidth) {
   ctx.strokeStyle = cssVar("--grid-faint");
   ctx.lineWidth = lineWidth;
   ctx.beginPath();
@@ -395,7 +430,7 @@ function drawSolution(ctx, maze, cellSize, lineWidth) {
   ctx.stroke();
 }
 
-function drawPortal(ctx, node, cellSize, isEntrance, scale = 1) {
+export function drawPortal(ctx, node, cellSize, isEntrance, scale = 1) {
   const x = node.x * cellSize;
   const y = node.y * cellSize;
   const color = isEntrance ? cssVar("--line") : cssVar("--ember");
@@ -461,24 +496,32 @@ function paintMaze(
   }
 }
 
-export function drawMaze(canvas, maze, view) {
+export const MAZE_INSET = 20;
+
+export function mazeLineWidth(maze, cellSize) {
+  const corridor = cellSize / Math.max(1, maze.maxRes);
+  return Math.min(2.4, Math.max(0.9, corridor * 0.42));
+}
+
+// Sizes a canvas to fit its holder at the maze's aspect ratio and returns a
+// context already scaled for the device and translated past the inset.
+export function fitCanvas(canvas, maze, inset = 0) {
   const holder = canvas.parentElement;
   const holderWidth = holder.clientWidth || 600;
   const holderHeight = holder.clientHeight || 440;
-  const inset = 18;
   const availableWidth = Math.max(1, holderWidth - inset * 2);
   const availableHeight = Math.max(1, holderHeight - inset * 2);
   const mazeAspect = maze.rows / maze.cols;
 
-  let mazeWidth = availableWidth;
-  let mazeHeight = Math.round(mazeWidth * mazeAspect);
-  if (mazeHeight > availableHeight) {
-    mazeHeight = availableHeight;
-    mazeWidth = Math.round(mazeHeight / mazeAspect);
+  let width = availableWidth;
+  let height = Math.round(width * mazeAspect);
+  if (height > availableHeight) {
+    height = availableHeight;
+    width = Math.round(height / mazeAspect);
   }
 
-  const cssWidth = mazeWidth + inset * 2;
-  const cssHeight = mazeHeight + inset * 2;
+  const cssWidth = width + inset * 2;
+  const cssHeight = height + inset * 2;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.round(cssWidth * dpr);
   canvas.height = Math.round(cssHeight * dpr);
@@ -488,10 +531,18 @@ export function drawMaze(canvas, maze, view) {
   const ctx = canvas.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssWidth, cssHeight);
-  ctx.save();
   ctx.translate(inset, inset);
-  paintMaze(ctx, maze, view, mazeWidth);
-  ctx.restore();
+
+  return { ctx, width, height, cellSize: width / maze.cols, dpr, inset };
+}
+
+export function drawMaze(canvas, maze, view) {
+  const { ctx, width, cellSize } = fitCanvas(canvas, maze, MAZE_INSET);
+  const lineWidth = view.lineWidth?.(maze, cellSize) ?? mazeLineWidth(maze, cellSize);
+  paintMaze(ctx, maze, view, width, {
+    mazeLineWidth: lineWidth,
+    solutionWidth: lineWidth + 1,
+  });
 }
 
 export function createMazeExport(maze, view) {
@@ -507,10 +558,11 @@ export function createMazeExport(maze, view) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.translate(inset, inset);
+  const lineWidth = view.lineWidth?.(maze, mazeWidth / maze.cols, 12);
   paintMaze(ctx, maze, view, mazeWidth, {
     structureWidth: 1.2,
-    mazeLineWidth: 3.2,
-    solutionWidth: 4,
+    mazeLineWidth: lineWidth ?? 3.2,
+    solutionWidth: lineWidth === undefined ? 4 : lineWidth + 2,
     showPortals: false,
   });
   ctx.restore();

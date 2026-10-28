@@ -6,113 +6,124 @@ import {
   createMaze,
   createMazeExport,
   createPresetImage,
-  drawMaze,
   randomSeed,
   recarveMaze,
 } from "./maze.js";
 import {
   bindControls,
+  describeStages,
   getControls,
-  playDevelopAnimation,
   readMazeOptions,
   readViewOptions,
-  setBusy,
   setControlsEnabled,
   showCopyFeedback,
+  showFocus,
 } from "./controls.js";
+import { createRenderer } from "./stages.js";
+import { stageWipeAnimation } from "./animations/stage-wipe.js";
+import { imageMorphAnimation } from "./animations/image-morph.js";
+
+const parameters = new URLSearchParams(window.location.search);
+const animation = parameters.get("animation") === "morph"
+  ? imageMorphAnimation
+  : stageWipeAnimation;
+const isAnimationPreview = parameters.get("preview") === "1";
+if (isAnimationPreview) await import("./styles/animation-preview.css");
+
+function nextSeed() {
+  return isAnimationPreview ? 271828182 : randomSeed();
+}
 
 const controls = getControls();
+controls.band.dataset.variant = animation.name;
 const state = {
   source: createPresetImage(),
   fileLabel: "preset",
   maze: null,
-  seed: randomSeed(),
+  seed: nextSeed(),
 };
 
-const THEME_KEY = "laberinto-theme";
-const THEME_NAMES = {
-  oxide: "Oxide Archive",
-  charcoal: "Charcoal Contact Sheet",
-};
+const renderer = createRenderer({
+  canvases: {
+    photo: controls.photoCanvas,
+    tones: controls.tonesCanvas,
+    graph: controls.graphCanvas,
+    maze: controls.mazeCanvas,
+    morph: controls.morphCanvas,
+  },
+  overlay: controls.carveCanvas,
+  band: controls.band,
+  handles: controls.handles,
+  morphTag: controls.morphTag,
+  animation,
+  onFocusChange: (name) => showFocus(controls, name),
+});
+
+function viewOptions() {
+  return { ...readViewOptions(controls), lineWidth: animation.lineWidth };
+}
+
 const BUILD_DELAY_MS = 20;
 
 let buildTimer;
+let resizeTimer;
 
 function draw() {
-  if (!state.maze) return;
-  drawMaze(controls.mazeCanvas, state.maze, readViewOptions(controls));
+  renderer.renderStatic(state, viewOptions());
 }
 
-function savedTheme() {
-  try {
-    const theme = localStorage.getItem(THEME_KEY);
-    return theme === "charcoal" ? theme : "oxide";
-  } catch {
-    return "oxide";
-  }
-}
-
-function applyTheme(theme) {
-  const nextTheme = theme === "oxide" ? "charcoal" : "oxide";
-  document.documentElement.dataset.theme = theme;
-  controls.themeBtn.setAttribute(
-    "aria-label",
-    `Switch to ${THEME_NAMES[nextTheme]} theme`,
-  );
-  controls.themeBtn.title = `Switch to ${THEME_NAMES[nextTheme]}`;
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-  } catch {
-    // The selected theme still applies when storage is unavailable.
-  }
-  draw();
-}
-
-function toggleTheme() {
-  const currentTheme = document.documentElement.dataset.theme || "oxide";
-  applyTheme(currentTheme === "oxide" ? "charcoal" : "oxide");
-}
-
-function finishBuild(maze) {
+function finishBuild(maze, from) {
   state.maze = maze;
   state.seed = maze.seed;
-  draw();
+  document.documentElement.style.setProperty(
+    "--aspect",
+    String(maze.cols / maze.rows),
+  );
+  describeStages(
+    controls,
+    maze,
+    state.fileLabel,
+    controls.invertToggle.checked,
+  );
   setControlsEnabled(controls, true);
-  setBusy(controls, false);
-  playDevelopAnimation(controls);
+  const view = viewOptions();
+  if (from === "photo") renderer.intro(state, view);
+  else if (from === "maze") renderer.recarve(state, view);
+  else renderer.update(state, view);
 }
 
-function scheduleBuild(buildMaze) {
+function scheduleBuild(buildMaze, from) {
   clearTimeout(buildTimer);
-  setBusy(controls, true);
   setControlsEnabled(controls, false);
   buildTimer = setTimeout(() => {
     buildTimer = undefined;
     try {
-      finishBuild(buildMaze());
+      finishBuild(buildMaze(), from);
     } catch (error) {
       setControlsEnabled(controls, Boolean(state.maze));
-      setBusy(controls, false);
       console.error("Maze generation failed.", error);
     }
   }, BUILD_DELAY_MS);
 }
 
-function rebuild({ newSeed = false } = {}) {
+function rebuild(from = "photo", { newSeed = false } = {}) {
   const source = state.source;
-  const options = readMazeOptions(controls);
-  const seed = newSeed ? randomSeed() : state.seed;
-  scheduleBuild(() => createMaze(source, options, seed));
+  const options = {
+    ...readMazeOptions(controls),
+    colorForPixel: animation.colorForPixel,
+  };
+  const seed = newSeed ? nextSeed() : state.seed;
+  scheduleBuild(() => createMaze(source, options, seed), from);
 }
 
 function recarve() {
   if (!state.maze) {
-    rebuild({ newSeed: true });
+    rebuild("photo", { newSeed: true });
     return;
   }
 
   const maze = state.maze;
-  scheduleBuild(() => recarveMaze(maze));
+  scheduleBuild(() => recarveMaze(maze), "maze");
 }
 
 function loadImageFile(file) {
@@ -123,9 +134,8 @@ function loadImageFile(file) {
   image.onload = () => {
     state.source = image;
     state.fileLabel = file.name;
-    document.body.classList.add("has-image");
     URL.revokeObjectURL(url);
-    rebuild({ newSeed: true });
+    rebuild("photo", { newSeed: true });
   };
   image.onerror = () => URL.revokeObjectURL(url);
   image.src = url;
@@ -136,7 +146,7 @@ function download() {
 
   const canvas = createMazeExport(
     state.maze,
-    readViewOptions(controls),
+    viewOptions(),
   );
   const safeLabel =
     state.fileLabel
@@ -169,7 +179,7 @@ async function copy() {
 
     const canvas = createMazeExport(
       state.maze,
-      readViewOptions(controls),
+      viewOptions(),
     );
     const blob = await canvasToBlob(canvas);
     await navigator.clipboard.write([
@@ -192,13 +202,25 @@ bindControls(controls, {
   onRebuild: rebuild,
   onRecarve: recarve,
   onDraw: draw,
+  onSolution: () =>
+    renderer.revealSolution(state, viewOptions()),
+  onFocus: (name) => renderer.focus(name),
   onCopy: copy,
   onDownload: download,
-  onThemeChange: toggleTheme,
 });
 
-window.addEventListener("resize", draw);
-applyTheme(savedTheme());
-document.body.classList.add("has-image");
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(draw, 120);
+});
 setControlsEnabled(controls, false);
-rebuild({ newSeed: true });
+const baseImage = new Image();
+baseImage.src = `${import.meta.env.BASE_URL}base-image.jpg`;
+try {
+  await baseImage.decode();
+  state.source = baseImage;
+  state.fileLabel = "base-image.jpg";
+} catch (error) {
+  console.error("Could not load the base image.", error);
+}
+rebuild("photo", { newSeed: true });

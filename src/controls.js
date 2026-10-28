@@ -1,7 +1,10 @@
 const elementIds = [
-  "themeBtn",
-  "imageCard",
-  "dropzone",
+  "band",
+  "sideBtn",
+  "photoNote",
+  "tonesNote",
+  "graphNote",
+  "mazeNote",
   "fileInput",
   "replaceBtn",
   "colsRange",
@@ -14,20 +17,34 @@ const elementIds = [
   "solutionToggle",
   "structureToggle",
   "colorToggle",
-  "adjustments",
   "regenBtn",
   "copyBtn",
   "copyStatus",
   "downloadBtn",
+  "photoCanvas",
+  "tonesCanvas",
+  "graphCanvas",
   "mazeCanvas",
-  "wash",
-  "busyVeil",
+  "carveCanvas",
+  "morphCanvas",
+  "morphTag",
 ];
 
 export function getControls() {
-  return Object.fromEntries(
-    elementIds.map((id) => [id, document.getElementById(id)]),
-  );
+  return {
+    ...Object.fromEntries(
+      elementIds.map((id) => [id, document.getElementById(id)]),
+    ),
+    handles: Array.from(document.querySelectorAll(".handle")),
+    stepButtons: Array.from(document.querySelectorAll("[data-show]")),
+  };
+}
+
+export function showFocus(controls, name) {
+  for (const button of controls.stepButtons) {
+    button.setAttribute("aria-pressed", String(button.dataset.show === name));
+  }
+  controls.sideBtn.setAttribute("aria-pressed", String(name === "all"));
 }
 
 export function readMazeOptions(controls) {
@@ -48,14 +65,30 @@ export function readViewOptions(controls) {
   };
 }
 
-export function setBusy(controls, isBusy) {
-  controls.busyVeil.classList.toggle("show", isBusy);
-}
-
 export function setControlsEnabled(controls, enabled) {
   controls.regenBtn.disabled = !enabled;
   controls.copyBtn.disabled = !enabled;
   controls.downloadBtn.disabled = !enabled;
+}
+
+const count = (value) => value.toLocaleString("en-US");
+
+export function describeStages(controls, maze, fileLabel, invert) {
+  controls.photoNote.textContent =
+    fileLabel === "preset"
+      ? "A sample landscape, painted in code. Swap in your own."
+      : fileLabel;
+  controls.tonesNote.textContent = `Shrunk to ${maze.cols} × ${maze.rows} squares. ${
+    invert ? "Lighter" : "Darker"
+  } squares will hold more corridors.`;
+  controls.graphNote.textContent = `Each square splits into up to ${maze.maxRes} × ${maze.maxRes} points, linked to their neighbours: ${count(
+    maze.graph.nodes.length,
+  )} points, ${count(maze.graph.allEdges.length)} links.`;
+  controls.mazeNote.textContent = `A random walk keeps ${count(
+    maze.treeEdges.length,
+  )} links, leaving one route from start to finish, ${count(
+    maze.solutionEdges.length,
+  )} steps long.`;
 }
 
 let copyFeedbackTimer;
@@ -64,19 +97,9 @@ export function showCopyFeedback(controls, label, announcement) {
   controls.copyBtn.textContent = label;
   controls.copyStatus.textContent = announcement;
   copyFeedbackTimer = setTimeout(() => {
-    controls.copyBtn.textContent = "Copy";
+    controls.copyBtn.textContent = "Copy image";
     controls.copyStatus.textContent = "";
   }, 1800);
-}
-
-export function playDevelopAnimation(controls) {
-  controls.mazeCanvas.classList.remove("developed");
-  void controls.mazeCanvas.offsetWidth;
-  controls.mazeCanvas.classList.add("developed");
-
-  controls.wash.classList.remove("run");
-  void controls.wash.offsetWidth;
-  controls.wash.classList.add("run");
 }
 
 export function bindControls(
@@ -86,46 +109,49 @@ export function bindControls(
     onRebuild,
     onRecarve,
     onDraw,
+    onSolution,
+    onFocus,
     onCopy,
     onDownload,
-    onThemeChange,
   },
 ) {
   let rebuildTimer;
   let dragDepth = 0;
 
-  const scheduleRebuild = () => {
+  const scheduleRebuild = (from) => {
     clearTimeout(rebuildTimer);
-    rebuildTimer = setTimeout(onRebuild, 160);
+    rebuildTimer = setTimeout(() => onRebuild(from), 180);
   };
 
   const openFilePicker = () => controls.fileInput.click();
-  controls.dropzone.addEventListener("click", openFilePicker);
+  for (const button of controls.stepButtons) {
+    button.addEventListener("click", () => onFocus(button.dataset.show));
+  }
+  controls.sideBtn.addEventListener("click", () => onFocus("all"));
   controls.replaceBtn.addEventListener("click", openFilePicker);
-  controls.dropzone.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      openFilePicker();
-    }
-  });
 
-  controls.imageCard.addEventListener("dragenter", (event) => {
+  const hasFiles = (event) =>
+    Array.from(event.dataTransfer?.types || []).includes("Files");
+
+  document.addEventListener("dragenter", (event) => {
+    if (!hasFiles(event)) return;
     event.preventDefault();
     dragDepth += 1;
-    controls.imageCard.classList.add("drag");
+    document.body.classList.add("dragging");
   });
-  controls.imageCard.addEventListener("dragover", (event) => {
+  document.addEventListener("dragover", (event) => {
+    if (!hasFiles(event)) return;
     event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    event.dataTransfer.dropEffect = "copy";
   });
-  controls.imageCard.addEventListener("dragleave", () => {
+  document.addEventListener("dragleave", () => {
     dragDepth = Math.max(0, dragDepth - 1);
-    if (dragDepth === 0) controls.imageCard.classList.remove("drag");
+    if (dragDepth === 0) document.body.classList.remove("dragging");
   });
-  controls.imageCard.addEventListener("drop", (event) => {
+  document.addEventListener("drop", (event) => {
     event.preventDefault();
     dragDepth = 0;
-    controls.imageCard.classList.remove("drag");
+    document.body.classList.remove("dragging");
     const [file] = event.dataTransfer?.files || [];
     if (file) onFile(file);
   });
@@ -137,36 +163,24 @@ export function bindControls(
 
   controls.colsRange.addEventListener("input", () => {
     controls.colsVal.textContent = controls.colsRange.value;
-    scheduleRebuild();
-  });
-  controls.resRange.addEventListener("input", () => {
-    controls.resVal.textContent = controls.resRange.value;
-    scheduleRebuild();
+    scheduleRebuild("tones");
   });
   controls.contrastRange.addEventListener("input", () => {
     controls.contrastVal.textContent = Number.parseFloat(
       controls.contrastRange.value,
     ).toFixed(1);
-    scheduleRebuild();
+    scheduleRebuild("tones");
   });
-  controls.invertToggle.addEventListener("change", onRebuild);
-  controls.solutionToggle.addEventListener("change", onDraw);
+  controls.resRange.addEventListener("input", () => {
+    const value = controls.resRange.value;
+    controls.resVal.textContent = `${value} × ${value}`;
+    scheduleRebuild("graph");
+  });
+  controls.invertToggle.addEventListener("change", () => onRebuild("tones"));
+  controls.solutionToggle.addEventListener("change", onSolution);
   controls.structureToggle.addEventListener("change", onDraw);
   controls.colorToggle.addEventListener("change", onDraw);
   controls.regenBtn.addEventListener("click", onRecarve);
   controls.copyBtn.addEventListener("click", onCopy);
   controls.downloadBtn.addEventListener("click", onDownload);
-  controls.themeBtn.addEventListener("click", onThemeChange);
-
-  document.addEventListener("pointerdown", (event) => {
-    if (
-      controls.adjustments.open &&
-      !controls.adjustments.contains(event.target)
-    ) {
-      controls.adjustments.open = false;
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") controls.adjustments.open = false;
-  });
 }

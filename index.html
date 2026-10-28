@@ -9,7 +9,7 @@
       content="Turn any image into a detailed, printable generative maze with adjustable grid, contrast, color, and solution controls."
     />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#262321" />
+    <meta name="theme-color" content="#1d2fc6" />
     <link
       rel="icon"
       type="image/png"
@@ -52,151 +52,159 @@
       src="https://cloud.umami.is/script.js"
       data-website-id="68e6d8b4-c17f-4ad2-b25a-63a2f2928261"
     ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400..900&family=Instrument+Sans:wght@400..700&display=swap"
+    />
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <nav class="site-tools" aria-label="Appearance and project links">
-      <button
-        class="theme-switcher"
-        id="themeBtn"
-        type="button"
-        aria-label="Switch to Charcoal Contact Sheet theme"
-        title="Switch to Charcoal Contact Sheet"
-      ></button>
-      <a
-        class="btn github-link"
-        href="https://github.com/ctx-o1/mazify"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="View Mazify on GitHub"
-      >
-        <span>GitHub</span>
-      </a>
-    </nav>
-
-    <main class="app">
-      <section
-        class="image-card"
-        id="imageCard"
-        aria-label="Image maze workspace"
-      >
-        <div class="canvas-holder">
-          <canvas id="mazeCanvas"></canvas>
-          <div
-            class="dropzone"
-            id="dropzone"
-            tabindex="0"
-            role="button"
-            aria-label="Choose an image"
-          >
-            <div class="dropzone-inner">
-              <div class="dropzone-copy">
-                <strong>Choose an image</strong>
-                <small>or drop it here</small>
-              </div>
-            </div>
+    <div class="app">
+      <aside class="rail">
+        <header class="intro">
+          <div class="brand">
+            <h1 class="wordmark">Mazify</h1>
+            <a
+              class="github-link"
+              href="https://github.com/ctx-o1/mazify"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub</a
+            >
           </div>
-          <input type="file" id="fileInput" accept="image/*" />
-          <div class="wash" id="wash"></div>
-          <div class="busy-veil" id="busyVeil">Creating maze…</div>
-        </div>
+          <p class="headline">Every picture hides a maze.</p>
+          <p class="lede">
+            Dark areas become tight corridors, light areas open up, and there
+            is exactly one way through. Drop a photo anywhere on the page.
+          </p>
+          <button class="btn btn-signal" id="replaceBtn" type="button">
+            Choose a photo
+          </button>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+        </header>
 
-        <div class="toolbar" aria-label="Maze controls">
-          <button class="btn" id="replaceBtn" type="button">Replace</button>
+        <ol class="steps" aria-label="How a photo becomes a maze">
+          <li class="step" data-stage="photo">
+            <button class="step-head" type="button" data-show="photo" aria-pressed="false">
+              <span class="step-num">1</span>
+              <span class="step-name">Photo</span>
+            </button>
+            <p class="step-note" id="photoNote">A sample landscape.</p>
+          </li>
 
-          <details class="adjustments" id="adjustments">
-            <summary class="btn">Adjust</summary>
-            <div class="settings-popover">
+          <li class="step" data-stage="tones">
+            <button class="step-head" type="button" data-show="tones" aria-pressed="false">
+              <span class="step-num">2</span>
+              <span class="step-name">Tones</span>
+            </button>
+            <p class="step-note" id="tonesNote"></p>
+            <div class="step-controls">
               <div class="field">
-                <div class="field-label">
-                  <label for="colsRange">Grid</label><b id="colsVal">36</b>
-                </div>
-                <input
-                  type="range"
-                  id="colsRange"
-                  min="10"
-                  max="56"
-                  step="1"
-                  value="36"
-                />
+                <label for="colsRange">Squares across</label>
+                <output id="colsVal" for="colsRange">36</output>
+                <input type="range" id="colsRange" min="10" max="56" step="1" value="36" />
               </div>
               <div class="field">
-                <div class="field-label">
-                  <label for="resRange">Detail</label><b id="resVal">5</b>
-                </div>
-                <input
-                  type="range"
-                  id="resRange"
-                  min="2"
-                  max="7"
-                  step="1"
-                  value="5"
-                />
+                <label for="contrastRange">Contrast</label>
+                <output id="contrastVal" for="contrastRange">1.0</output>
+                <input type="range" id="contrastRange" min="0.5" max="2" step="0.1" value="1" />
               </div>
+              <label class="check">
+                <input type="checkbox" id="invertToggle" />
+                <span>Invert, so light areas get the corridors</span>
+              </label>
+            </div>
+          </li>
+
+          <li class="step" data-stage="graph">
+            <button class="step-head" type="button" data-show="graph" aria-pressed="false">
+              <span class="step-num">3</span>
+              <span class="step-name">Graph</span>
+            </button>
+            <p class="step-note" id="graphNote"></p>
+            <div class="step-controls">
               <div class="field">
-                <div class="field-label">
-                  <label for="contrastRange">Contrast</label
-                  ><b id="contrastVal">1.0</b>
-                </div>
-                <input
-                  type="range"
-                  id="contrastRange"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
-                  value="1"
-                />
-              </div>
-              <div class="toggle-grid">
-                <div class="toggle-row">
-                  <label for="invertToggle">Invert tones</label>
-                  <div class="switch">
-                    <input type="checkbox" id="invertToggle" />
-                    <div class="track"></div>
-                    <div class="knob"></div>
-                  </div>
-                </div>
-                <div class="toggle-row">
-                  <label for="solutionToggle">Show solution</label>
-                  <div class="switch">
-                    <input type="checkbox" id="solutionToggle" />
-                    <div class="track"></div>
-                    <div class="knob"></div>
-                  </div>
-                </div>
-                <div class="toggle-row">
-                  <label for="structureToggle">Show structure</label>
-                  <div class="switch">
-                    <input type="checkbox" id="structureToggle" />
-                    <div class="track"></div>
-                    <div class="knob"></div>
-                  </div>
-                </div>
-                <div class="toggle-row">
-                  <label for="colorToggle">Source colors</label>
-                  <div class="switch">
-                    <input type="checkbox" id="colorToggle" checked />
-                    <div class="track"></div>
-                    <div class="knob"></div>
-                  </div>
-                </div>
+                <label for="resRange">Most points per square</label>
+                <output id="resVal" for="resRange">5 × 5</output>
+                <input type="range" id="resRange" min="2" max="7" step="1" value="5" />
               </div>
             </div>
-          </details>
+          </li>
 
-          <button class="btn" id="regenBtn" type="button" disabled>New</button>
-          <button class="btn" id="copyBtn" type="button" disabled>Copy</button>
-          <button class="btn primary" id="downloadBtn" type="button" disabled>
-            PRINT
+          <li class="step" data-stage="maze">
+            <button class="step-head" type="button" data-show="maze" aria-pressed="false">
+              <span class="step-num">4</span>
+              <span class="step-name">Maze</span>
+            </button>
+            <p class="step-note" id="mazeNote"></p>
+            <div class="step-controls">
+              <div class="checks">
+                <label class="check">
+                  <input type="checkbox" id="solutionToggle" />
+                  <span>Show solution</span>
+                </label>
+                <label class="check">
+                  <input type="checkbox" id="colorToggle" checked />
+                  <span>Photo colours</span>
+                </label>
+                <label class="check">
+                  <input type="checkbox" id="structureToggle" />
+                  <span>Graph underneath</span>
+                </label>
+              </div>
+              <div class="actions">
+                <button class="btn btn-signal" id="downloadBtn" type="button" disabled>
+                  Download PNG
+                </button>
+                <button class="btn" id="regenBtn" type="button" disabled>New maze</button>
+                <button class="btn" id="copyBtn" type="button" disabled>Copy image</button>
+              </div>
+              <span class="visually-hidden" id="copyStatus" role="status" aria-live="polite"></span>
+            </div>
+          </li>
+        </ol>
+      </aside>
+
+      <main class="stage-area" aria-label="The same picture at each stage">
+        <div class="stage-bar">
+          <p class="stage-hint">Drag the dividers to compare, or pick a step.</p>
+          <button class="side-btn" id="sideBtn" type="button" aria-pressed="false">
+            Side by side
           </button>
-          <span
-            class="visually-hidden"
-            id="copyStatus"
-            role="status"
-            aria-live="polite"
-          ></span>
         </div>
-      </section>
-    </main>
+        <div class="band" id="band" data-focus="photo">
+          <div class="layer" data-stage="photo">
+            <canvas id="photoCanvas" aria-hidden="true"></canvas>
+            <span class="tag">Photo</span>
+          </div>
+          <div class="layer" data-stage="tones">
+            <canvas id="tonesCanvas" aria-hidden="true"></canvas>
+            <span class="tag">Tones</span>
+          </div>
+          <div class="layer" data-stage="graph">
+            <canvas id="graphCanvas" aria-hidden="true"></canvas>
+            <span class="tag">Graph</span>
+          </div>
+          <div class="layer" data-stage="maze">
+            <canvas id="mazeCanvas" role="img" aria-label="The finished maze"></canvas>
+            <canvas id="carveCanvas" aria-hidden="true"></canvas>
+            <span class="tag">Maze</span>
+          </div>
+          <div class="layer morph-layer">
+            <canvas id="morphCanvas" aria-hidden="true"></canvas>
+            <span class="tag" id="morphTag">Photo</span>
+          </div>
+          <button class="handle" type="button" role="slider" aria-label="Divider between photo and tones" aria-valuemin="0" aria-valuemax="100" style="--at: var(--b1)"></button>
+          <button class="handle" type="button" role="slider" aria-label="Divider between tones and graph" aria-valuemin="0" aria-valuemax="100" style="--at: var(--b2)"></button>
+          <button class="handle" type="button" role="slider" aria-label="Divider between graph and maze" aria-valuemin="0" aria-valuemax="100" style="--at: var(--b3)"></button>
+        </div>
+      </main>
+    </div>
+
+    <div class="drop-overlay" id="dropOverlay" aria-hidden="true">
+      <p>Let go to make a maze</p>
+    </div>
   </body>
 </html>

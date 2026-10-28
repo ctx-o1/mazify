@@ -1,147 +1,209 @@
-.canvas-holder {
-  position: relative;
-  width: 100%;
-  height: clamp(360px, 48vw, 440px);
-  min-height: 0;
-  flex: 0 0 auto;
-  overflow: hidden;
+/* ============ the band ============ */
+.stage-area {
+  min-width: 0;
+  position: sticky;
+  top: var(--gutter);
   display: grid;
-  place-items: center;
-  border-radius: 0;
-  background: var(--plate);
+  gap: 12px;
 }
 
-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  opacity: 0;
-  transition:
-    opacity 0.35s ease,
-    filter 0.2s ease;
-}
-body.has-image canvas {
-  opacity: 1;
-}
-canvas.developed {
-  animation: develop 0.65s ease both;
-}
-@keyframes develop {
-  from {
-    opacity: 0.35;
-    filter: blur(4px);
-    transform: scale(0.995);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1);
-  }
+.stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
 }
 
-.dropzone {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
-  place-items: center;
+.stage-hint {
+  margin: 0;
+  color: var(--on-ground-muted);
+  font-size: 14px;
+}
+
+.side-btn {
+  padding: 6px 14px;
+  border: 2px solid var(--on-ground);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
-  border-radius: 0;
-  transition: background 0.25s ease;
-}
-.dropzone-inner {
-  display: grid;
-  justify-items: center;
-  gap: 22px;
-  color: var(--muted);
-  text-align: center;
-  padding: 32px;
-}
-.dropzone-copy {
-  display: grid;
-  gap: 8px;
-}
-.dropzone-copy strong {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.dropzone-copy small {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-.dropzone.drag {
-  background: rgba(255, 255, 252, 0.2);
-}
-body.has-image .dropzone {
-  pointer-events: none;
-  opacity: 0;
-}
-body.has-image .image-card.drag .dropzone {
-  opacity: 1;
-  background: rgba(240, 236, 223, 0.78);
-}
-.image-card.drag .canvas-holder {
-  background: #cec8b9;
-}
-#fileInput {
-  display: none;
 }
 
-.wash {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 32%,
-    rgba(255, 255, 255, 0.65) 50%,
-    transparent 68%
-  );
-  background-size: 240% 100%;
-  opacity: 0;
-}
-.wash.run {
-  animation: wash 0.7s ease both;
-}
-@keyframes wash {
-  0% {
-    opacity: 0;
-    background-position: 120% 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    background-position: -40% 0;
-  }
+.side-btn:hover,
+.side-btn[aria-pressed="true"] {
+  background: var(--on-ground);
+  color: var(--ground);
 }
 
-.busy-veil {
+.band {
+  --b1: 100%;
+  --b2: 100%;
+  --b3: 100%;
+  position: relative;
+  justify-self: center;
+  width: min(100%, calc((100svh - var(--gutter) * 2 - 48px) * var(--aspect)));
+  aspect-ratio: var(--aspect);
+  background: var(--sheet);
+  box-shadow:
+    0 50px 90px -40px rgba(4, 8, 60, 0.75),
+    0 18px 30px -18px rgba(4, 8, 60, 0.5);
+  transition:
+    --b1 0.95s var(--sweep),
+    --b2 0.95s var(--sweep),
+    --b3 0.95s var(--sweep);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.band.is-instant,
+.band.is-dragging {
+  transition: none;
+}
+
+.layer {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(216, 212, 200, 0.72);
-  color: var(--muted);
-  font-size: 13px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-  backdrop-filter: blur(5px);
-}
-.busy-veil.show {
-  opacity: 1;
+  clip-path: inset(0 calc(100% - var(--r)) 0 var(--l));
 }
 
-@media (max-width: 620px) {
-  .canvas-holder {
-    height: min(72vw, 390px);
-    min-height: 0;
-    border-radius: 0;
+.layer[data-stage="photo"] {
+  --l: 0%;
+  --r: var(--b1);
+}
+.layer[data-stage="tones"] {
+  --l: var(--b1);
+  --r: var(--b2);
+}
+.layer[data-stage="graph"] {
+  --l: var(--b2);
+  --r: var(--b3);
+}
+.layer[data-stage="maze"] {
+  --l: var(--b3);
+  --r: 100%;
+}
+
+.layer canvas {
+  grid-area: 1 / 1;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.tag {
+  position: absolute;
+  left: calc(var(--l) + 10px);
+  bottom: 10px;
+  padding: 3px 9px 4px;
+  background: var(--ink);
+  color: var(--sheet);
+  font-family: "Unbounded", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* dividers */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--at);
+  width: 36px;
+  margin-left: -18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+  transition: opacity 0.3s ease;
+}
+
+.handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 17px;
+  width: 2px;
+  background: var(--signal);
+}
+
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  translate: -50% -50%;
+  rotate: 45deg;
+  background: var(--signal);
+  box-shadow: 0 0 0 3px var(--sheet);
+  transition: scale 0.15s ease;
+}
+
+.handle:hover::after,
+.band.is-dragging .handle::after {
+  scale: 1.15;
+}
+
+.handle:focus-visible {
+  outline: none;
+}
+
+.handle:focus-visible::after {
+  box-shadow:
+    0 0 0 3px var(--sheet),
+    0 0 0 6px var(--signal);
+}
+
+.band:not([data-focus="all"]) .handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .stage-area {
+    position: static;
   }
+
+  .band {
+    width: 100%;
+  }
+
+  .stage-hint {
+    font-size: 13px;
+  }
+
+  .handle::after {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* The image morph uses one canvas above the individual stage layers. */
+.morph-layer {
+  --l: 0%;
+  --r: 100%;
+  visibility: hidden;
+}
+
+.band.is-morphing .layer:not(.morph-layer) {
+  visibility: hidden;
+}
+
+.band.is-morphing .morph-layer {
+  visibility: visible;
+}
+
+.band.is-morphing .handle {
+  opacity: 0;
+  pointer-events: none;
 }

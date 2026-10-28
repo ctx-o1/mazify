@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mazify</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#1e1f20" />
+    <link rel="icon" type="image/png" href="%BASE_URL%favicon-96x96.png" sizes="96x96" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&display=swap"
+    />
+    <script type="module" src="/src/draft/main.js"></script>
+  </head>
+  <body>
+    <main class="room">
+      <figure class="work">
+        <canvas id="hero" role="img" aria-label="A painting turning into a maze. Click to replay."></canvas>
+        <figcaption class="caption">
+          <span id="credit"><cite>The Creation of Adam</cite>, Michelangelo, c. 1512.</span>
+          Drop any picture here, or
+          <button class="choose" id="chooseBtn" type="button">choose one</button>.
+        </figcaption>
+      </figure>
+      <input type="file" id="fileInput" accept="image/*" hidden />
+    </main>
+  </body>
+</html>

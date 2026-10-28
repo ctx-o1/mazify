@@ -1,0 +1,87 @@
+:root {
+  --wall: #1e1f20;
+  --wall-deep: #18191a;
+  --parchment: #d9d7d2;
+  --muted: #85847f;
+  --gold: #b9b4a8;
+  --comet: #ffe2a8;
+
+  --aspect: 2.2;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--wall);
+  color: var(--parchment);
+  font-family: "EB Garamond", Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.room {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.work {
+  width: min(94vw, calc((100svh - 120px) * var(--aspect)));
+  margin: 0;
+}
+
+#hero {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--aspect);
+  background: var(--wall-deep);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+}
+
+.caption {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+#credit {
+  color: var(--parchment);
+}
+
+.choose {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--parchment);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(217, 215, 210, 0.4);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.choose:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 1px solid var(--parchment);
+  outline-offset: 4px;
+}
+
+body.dragging #hero {
+  outline: 1px dashed var(--parchment);
+  outline-offset: 8px;
+}

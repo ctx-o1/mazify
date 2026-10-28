@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mazify — animation comparison</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #f2f1ed; color: #173b31; font: 15px/1.5 system-ui, sans-serif; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 20px; }
+    h1 { font-size: 24px; letter-spacing: -1px; margin: 0 0 6px; }
+    header p { margin: 0; color: #626b65; }
+    button { border: 1px solid #bac2bb; border-radius: 8px; padding: 9px 15px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+    button:hover { background: #e3e8e1; }
+    #replayAll { background: #173b31; color: #fff; border-color: #173b31; white-space: nowrap; }
+    .versions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; max-width: min(1320px, calc(200svh - 472px)); margin: 0 auto; }
+    article { min-width: 0; }
+    .card-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+    h2 { font-size: 18px; margin: 0; }
+    .number { display: none; color: #78847c; font-size: 12px; margin-bottom: 4px; }
+    iframe { display: block; width: 100%; aspect-ratio: 1; border: 1px solid #d7d9d1; border-radius: 4px; background: #f6f4ef; }
+    article p { color: #626b65; margin-top: 14px; }
+    a { color: inherit; }
+    @media (max-width: 950px) { body { padding: 22px; } .versions { grid-template-columns: 1fr; gap: 28px; max-width: none; } header { align-items: start; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>Stage wipe vs image morph</h1><p>Same picture, palette, and seed. Each version finishes on the full maze.</p></div>
+    <button id="replayAll" type="button">Replay both</button>
+  </header>
+  <main class="versions">
+    <article>
+      <div class="number">01</div>
+      <div class="card-heading"><h2>Stage wipe</h2><button data-replay="wipe" type="button" aria-label="Replay stage wipe">Replay</button></div>
+      <iframe id="wipe" src="./?animation=wipe&amp;preview=1" title="Stage wipe animation"></iframe>
+      <p>Stage wipes, followed by the original maze drawing.</p>
+      <a href="./?animation=wipe&amp;preview=1" target="_blank" rel="noopener">Open Stage wipe full size ↗</a>
+    </article>
+    <article>
+      <div class="number">02</div>
+      <div class="card-heading"><h2>Image morph</h2><button data-replay="morph" type="button" aria-label="Replay image morph">Replay</button></div>
+      <iframe id="morph" src="./?animation=morph&amp;preview=1" title="Image morph animation"></iframe>
+      <p>Continuous morph, then coloured paths drawn over a faint grid.</p>
+      <a href="./?animation=morph&amp;preview=1" target="_blank" rel="noopener">Open Image morph full size ↗</a>
+    </article>
+  </main>
+  <script>
+    function replay(id) {
+      const frame = document.getElementById(id);
+      frame.src = frame.getAttribute('src');
+    }
+    document.getElementById('replayAll').addEventListener('click', () => {
+      for (const id of ['wipe', 'morph']) replay(id);
+    });
+    for (const button of document.querySelectorAll('[data-replay]')) {
+      button.addEventListener('click', () => replay(button.dataset.replay));
+    }
+  </script>
+</body>
+</html>
