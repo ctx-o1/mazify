@@ -31,6 +31,16 @@ npm install
 npm run dev
 ```
 
+## Animations
+
+Image morph is the default animation. Stage wipe is also available through
+`?animation=wipe`. Open `animations.html` to compare them with the same image,
+generation settings, and seed.
+
+The two versions have different line weights and colour treatments as well as
+different transitions. Their settings, keyframes, and rendering differences are
+documented in [Animation variants](docs/animations.md).
+
 
 ## References
 

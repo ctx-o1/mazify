@@ -15,21 +15,19 @@
 }
 
 :root {
-  /* Poster ultramarine, a white print sheet, deep navy ink, vermilion signal. */
-  --ground: #1d2fc6;
-  --ground-deep: #15229a;
-  --sheet: #f6f4ef;
-  --plate: #f6f4ef;
-  --ink: #0c1140;
-  --line: #0c1140;
-  --blue: #1d2fc6;
-  --signal: #ff5a36;
-  --ember: #ff5a36;
-  --underlay: rgba(29, 47, 198, 0.16);
-  --grid-faint: rgba(29, 47, 198, 0.28);
-  --on-ground: #f6f4ef;
-  --on-ground-muted: rgba(246, 244, 239, 0.74);
-  --rule: rgba(246, 244, 239, 0.24);
+  --ground: #f3efe5;
+  --sheet: #fbfaf6;
+  --plate: #fbfaf6;
+  --ink: #29382f;
+  --line: #29382f;
+  --blue: #647c76;
+  --signal: #9b4c34;
+  --ember: #b45f3f;
+  --underlay: rgba(70, 99, 84, 0.16);
+  --grid-faint: rgba(70, 99, 84, 0.28);
+  --on-ground: #29382f;
+  --on-ground-muted: #657064;
+  --rule: rgba(48, 69, 55, 0.2);
 
   --aspect: 1.24;
   --gutter: clamp(16px, 2.6vw, 40px);
@@ -49,10 +47,10 @@ body {
 
 body {
   min-height: 100vh;
-  background: var(--ground);
+  background: var(--ground) url("/backgrounds/light-oil-painting.jpg") center / cover fixed no-repeat;
   color: var(--on-ground);
   font-family: "Instrument Sans", system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -70,27 +68,32 @@ output {
 }
 
 .app {
+  --stage-width: min(720px, calc((80svh - var(--gutter) * 2 - 40px) * var(--aspect)));
+  --column-gap: 36px;
   display: grid;
-  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
-  gap: clamp(24px, 3.4vw, 56px);
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: 18px var(--column-gap);
+  width: calc(300px + var(--column-gap) + var(--stage-width) + var(--gutter) * 2);
   padding: var(--gutter);
-  max-width: 1760px;
+  max-width: 100%;
   margin: 0 auto;
-  align-items: start;
 }
 
 /* ============ rail ============ */
 .rail {
-  min-width: 0;
-  display: grid;
-  gap: 40px;
-  padding-bottom: 24px;
+  display: contents;
 }
 
 .intro {
+  grid-area: 1 / 1;
+  min-width: 0;
   display: grid;
-  gap: 18px;
+  gap: 10px;
   justify-items: start;
+}
+
+.steps {
+  grid-area: 2 / 1;
 }
 
 .brand {
@@ -104,7 +107,7 @@ output {
 .wordmark {
   margin: 0;
   font-family: "Unbounded", sans-serif;
-  font-size: clamp(38px, 3.4vw, 52px);
+  font-size: clamp(28px, 2.4vw, 32px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -119,31 +122,13 @@ output {
   text-underline-offset: 4px;
 }
 
-.headline {
-  margin: 8px 0 0;
-  font-family: "Unbounded", sans-serif;
-  font-size: clamp(26px, 2.3vw, 34px);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.lede {
-  margin: 0;
-  max-width: 38ch;
-  color: var(--on-ground-muted);
-  font-size: 16px;
-  text-wrap: pretty;
-}
-
 .drop-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
-  background: rgba(21, 34, 154, 0.9);
+  background: rgba(243, 239, 229, 0.94);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -154,7 +139,7 @@ output {
   padding: 0.4em 0.8em;
   border: 3px dashed var(--signal);
   font-family: "Unbounded", sans-serif;
-  font-size: clamp(26px, 4vw, 56px);
+  font-size: clamp(22px, 3vw, 40px);
   font-weight: 700;
 }
 
@@ -177,22 +162,12 @@ body.dragging .drop-overlay {
 @media (max-width: 900px) {
   .app {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .rail {
-    display: contents;
-  }
-
-  .intro {
-    order: 1;
-  }
-
-  .stage-area {
-    order: 2;
+    width: calc(var(--stage-width) + var(--gutter) * 2);
+    row-gap: 12px;
   }
 
   .steps {
-    order: 3;
+    grid-area: 4 / 1;
   }
 }
 

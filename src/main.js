@@ -11,22 +11,22 @@ import {
 } from "./maze.js";
 import {
   bindControls,
-  describeStages,
   getControls,
   readMazeOptions,
   readViewOptions,
   setControlsEnabled,
   showCopyFeedback,
   showFocus,
+  showSource,
 } from "./controls.js";
 import { createRenderer } from "./stages.js";
 import { stageWipeAnimation } from "./animations/stage-wipe.js";
 import { imageMorphAnimation } from "./animations/image-morph.js";
 
 const parameters = new URLSearchParams(window.location.search);
-const animation = parameters.get("animation") === "morph"
-  ? imageMorphAnimation
-  : stageWipeAnimation;
+const animation = parameters.get("animation") === "wipe"
+  ? stageWipeAnimation
+  : imageMorphAnimation;
 const isAnimationPreview = parameters.get("preview") === "1";
 if (isAnimationPreview) await import("./styles/animation-preview.css");
 
@@ -79,12 +79,7 @@ function finishBuild(maze, from) {
     "--aspect",
     String(maze.cols / maze.rows),
   );
-  describeStages(
-    controls,
-    maze,
-    state.fileLabel,
-    controls.invertToggle.checked,
-  );
+  showSource(controls, state.fileLabel);
   setControlsEnabled(controls, true);
   const view = viewOptions();
   if (from === "photo") renderer.intro(state, view);
@@ -214,13 +209,4 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(draw, 120);
 });
 setControlsEnabled(controls, false);
-const baseImage = new Image();
-baseImage.src = `${import.meta.env.BASE_URL}base-image.jpg`;
-try {
-  await baseImage.decode();
-  state.source = baseImage;
-  state.fileLabel = "base-image.jpg";
-} catch (error) {
-  console.error("Could not load the base image.", error);
-}
 rebuild("photo", { newSeed: true });

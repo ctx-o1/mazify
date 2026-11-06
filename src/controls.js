@@ -2,9 +2,6 @@ const elementIds = [
   "band",
   "sideBtn",
   "photoNote",
-  "tonesNote",
-  "graphNote",
-  "mazeNote",
   "fileInput",
   "replaceBtn",
   "colsRange",
@@ -71,24 +68,11 @@ export function setControlsEnabled(controls, enabled) {
   controls.downloadBtn.disabled = !enabled;
 }
 
-const count = (value) => value.toLocaleString("en-US");
-
-export function describeStages(controls, maze, fileLabel, invert) {
+export function showSource(controls, fileLabel) {
   controls.photoNote.textContent =
-    fileLabel === "preset"
-      ? "A sample landscape, painted in code. Swap in your own."
+    fileLabel === "preset" || fileLabel === "base-image.jpg"
+      ? "Example image"
       : fileLabel;
-  controls.tonesNote.textContent = `Shrunk to ${maze.cols} × ${maze.rows} squares. ${
-    invert ? "Lighter" : "Darker"
-  } squares will hold more corridors.`;
-  controls.graphNote.textContent = `Each square splits into up to ${maze.maxRes} × ${maze.maxRes} points, linked to their neighbours: ${count(
-    maze.graph.nodes.length,
-  )} points, ${count(maze.graph.allEdges.length)} links.`;
-  controls.mazeNote.textContent = `A random walk keeps ${count(
-    maze.treeEdges.length,
-  )} links, leaving one route from start to finish, ${count(
-    maze.solutionEdges.length,
-  )} steps long.`;
 }
 
 let copyFeedbackTimer;

@@ -496,7 +496,7 @@ function paintMaze(
   }
 }
 
-export const MAZE_INSET = 20;
+export const MAZE_INSET = 0;
 
 export function mazeLineWidth(maze, cellSize) {
   const corridor = cellSize / Math.max(1, maze.maxRes);

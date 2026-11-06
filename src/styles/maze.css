@@ -1,32 +1,27 @@
 /* ============ the band ============ */
 .stage-area {
-  min-width: 0;
-  position: sticky;
-  top: var(--gutter);
-  display: grid;
-  gap: 12px;
+  display: contents;
 }
 
 .stage-bar {
+  grid-area: 1 / 2;
+  align-self: end;
+  min-width: 0;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 12px;
   min-height: 36px;
 }
 
-.stage-hint {
-  margin: 0;
-  color: var(--on-ground-muted);
-  font-size: 14px;
-}
-
 .side-btn {
-  padding: 6px 14px;
+  min-height: 36px;
+  padding: 5px 11px;
   border: 2px solid var(--on-ground);
   border-radius: 999px;
   background: transparent;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -42,14 +37,12 @@
   --b1: 100%;
   --b2: 100%;
   --b3: 100%;
+  grid-area: 2 / 2;
+  align-self: start;
   position: relative;
-  justify-self: center;
-  width: min(100%, calc((100svh - var(--gutter) * 2 - 48px) * var(--aspect)));
+  width: 100%;
   aspect-ratio: var(--aspect);
   background: var(--sheet);
-  box-shadow:
-    0 50px 90px -40px rgba(4, 8, 60, 0.75),
-    0 18px 30px -18px rgba(4, 8, 60, 0.5);
   transition:
     --b1 0.95s var(--sweep),
     --b2 0.95s var(--sweep),
@@ -68,6 +61,7 @@
   inset: 0;
   display: grid;
   place-items: center;
+  overflow: hidden;
   clip-path: inset(0 calc(100% - var(--r)) 0 var(--l));
 }
 
@@ -97,13 +91,13 @@
 
 .tag {
   position: absolute;
-  left: calc(var(--l) + 10px);
-  bottom: 10px;
-  padding: 3px 9px 4px;
+  left: calc(var(--l) + 8px);
+  bottom: 8px;
+  padding: 2px 7px 3px;
   background: var(--ink);
   color: var(--sheet);
   font-family: "Unbounded", sans-serif;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
@@ -140,8 +134,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   translate: -50% -50%;
   rotate: 45deg;
   background: var(--signal);
@@ -170,21 +164,17 @@
 }
 
 @media (max-width: 900px) {
-  .stage-area {
-    position: static;
+  .stage-bar {
+    grid-area: 2 / 1;
   }
 
   .band {
-    width: 100%;
-  }
-
-  .stage-hint {
-    font-size: 13px;
+    grid-area: 3 / 1;
   }
 
   .handle::after {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 }
 
