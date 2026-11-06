@@ -73,15 +73,20 @@ export function showSource(controls, fileLabel) {
     fileLabel === "preset" || fileLabel === "base-image.jpg"
       ? "Example image"
       : fileLabel;
+  controls.photoNote.title = controls.photoNote.textContent;
 }
 
 let copyFeedbackTimer;
 export function showCopyFeedback(controls, label, announcement) {
   clearTimeout(copyFeedbackTimer);
-  controls.copyBtn.textContent = label;
+  controls.copyBtn.dataset.feedback = label;
+  controls.copyBtn.setAttribute("aria-label", label);
+  controls.copyBtn.title = label;
   controls.copyStatus.textContent = announcement;
   copyFeedbackTimer = setTimeout(() => {
-    controls.copyBtn.textContent = "Copy image";
+    delete controls.copyBtn.dataset.feedback;
+    controls.copyBtn.setAttribute("aria-label", "Copy image");
+    controls.copyBtn.title = "Copy image";
     controls.copyStatus.textContent = "";
   }, 1800);
 }

@@ -61,108 +61,93 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
+    <nav class="navbar" aria-label="Project">
+      <a class="github-link" href="https://github.com/ctx-o1/mazify" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6M15 22v-3.4c0-1 .1-1.4-.5-2 3-.3 6.2-1.5 6.2-7a5.4 5.4 0 0 0-1.5-3.7 5 5 0 0 0-.1-3.7s-1.2-.4-3.8 1.4a13.1 13.1 0 0 0-6.8 0C5.9 1.8 4.7 2.2 4.7 2.2a5 5 0 0 0-.1 3.7A5.4 5.4 0 0 0 3.1 9.6c0 5.5 3.2 6.7 6.2 7-.6.6-.6 1.2-.5 2V22" /></svg>
+        GitHub
+      </a>
+    </nav>
     <div class="app">
       <aside class="rail">
         <header class="intro">
-          <div class="brand">
-            <h1 class="wordmark">Mazify</h1>
-            <a
-              class="github-link"
-              href="https://github.com/ctx-o1/mazify"
-              target="_blank"
-              rel="noopener noreferrer"
-              >GitHub</a
-            >
+          <div class="source-row">
+            <button class="btn icon-btn" id="replaceBtn" type="button" aria-label="Choose a photo" title="Choose a photo">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6" /></svg>
+            </button>
+            <p class="source-name" id="photoNote">The Birth of Venus · Sandro Botticelli</p>
           </div>
-          <button class="btn btn-signal" id="replaceBtn" type="button">
-            Choose a photo
-          </button>
           <input type="file" id="fileInput" accept="image/*" hidden />
         </header>
 
-        <ol class="steps" aria-label="How a photo becomes a maze">
-          <li class="step" data-stage="photo">
-            <button class="step-head" type="button" data-show="photo" aria-pressed="false">
-              <span class="step-num">1</span>
-              <span class="step-name">Photo</span>
-            </button>
-            <p class="step-note" id="photoNote">Example image</p>
-          </li>
-
-          <li class="step" data-stage="tones">
-            <button class="step-head" type="button" data-show="tones" aria-pressed="false">
-              <span class="step-num">2</span>
-              <span class="step-name">Tones</span>
-            </button>
-            <div class="step-controls">
-              <div class="field">
-                <label for="colsRange">Density</label>
-                <output id="colsVal" for="colsRange">36</output>
-                <input type="range" id="colsRange" min="10" max="56" step="1" value="36" />
-              </div>
-              <div class="field">
-                <label for="contrastRange">Contrast</label>
-                <output id="contrastVal" for="contrastRange">1.0</output>
-                <input type="range" id="contrastRange" min="0.5" max="2" step="0.1" value="1" />
-              </div>
-              <label class="check">
-                <input type="checkbox" id="invertToggle" />
-                <span>Invert tones</span>
-              </label>
+        <section class="settings" aria-label="Image and maze settings">
+          <div class="adjustments">
+            <div class="field">
+              <label for="colsRange">Density</label>
+              <output id="colsVal" for="colsRange">36</output>
+              <input type="range" id="colsRange" min="10" max="56" step="1" value="36" />
             </div>
-          </li>
-
-          <li class="step" data-stage="graph">
-            <button class="step-head" type="button" data-show="graph" aria-pressed="false">
-              <span class="step-num">3</span>
-              <span class="step-name">Graph</span>
-            </button>
-            <div class="step-controls">
-              <div class="field">
-                <label for="resRange">Detail</label>
-                <output id="resVal" for="resRange">5 × 5</output>
-                <input type="range" id="resRange" min="2" max="7" step="1" value="5" />
-              </div>
+            <div class="field">
+              <label for="resRange">Detail</label>
+              <output id="resVal" for="resRange">5 × 5</output>
+              <input type="range" id="resRange" min="2" max="7" step="1" value="5" />
             </div>
-          </li>
-
-          <li class="step" data-stage="maze">
-            <button class="step-head" type="button" data-show="maze" aria-pressed="false">
-              <span class="step-num">4</span>
-              <span class="step-name">Maze</span>
-            </button>
-            <div class="step-controls">
-              <div class="checks">
-                <label class="check">
-                  <input type="checkbox" id="solutionToggle" />
-                  <span>Show solution</span>
-                </label>
-                <label class="check">
-                  <input type="checkbox" id="colorToggle" checked />
-                  <span>Photo colours</span>
-                </label>
-                <label class="check">
-                  <input type="checkbox" id="structureToggle" />
-                  <span>Graph underneath</span>
-                </label>
-              </div>
-              <div class="actions">
-                <button class="btn btn-signal" id="downloadBtn" type="button" disabled>
-                  Download PNG
-                </button>
-                <button class="btn" id="regenBtn" type="button" disabled>New maze</button>
-                <button class="btn" id="copyBtn" type="button" disabled>Copy image</button>
-              </div>
-              <span class="visually-hidden" id="copyStatus" role="status" aria-live="polite"></span>
+            <div class="field">
+              <label for="contrastRange">Contrast</label>
+              <output id="contrastVal" for="contrastRange">1.0</output>
+              <input type="range" id="contrastRange" min="0.5" max="2" step="0.1" value="1" />
             </div>
-          </li>
-        </ol>
+          </div>
+          <div class="checks">
+            <label class="check">
+              <input type="checkbox" id="invertToggle" />
+              <span>Invert tones</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="colorToggle" checked />
+              <span>Photo colours</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="solutionToggle" />
+              <span>Show solution</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="structureToggle" />
+              <span>Graph underneath</span>
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn btn-signal icon-btn" id="downloadBtn" type="button" aria-label="Download PNG" title="Download PNG" disabled>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4" /></svg>
+            </button>
+            <button class="btn icon-btn" id="regenBtn" type="button" aria-label="New maze" title="New maze" disabled>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M5.3 7a8 8 0 0 1 13.2-1L20 12M4 12l1.5 6A8 8 0 0 0 18.7 17" /></svg>
+            </button>
+            <button class="btn icon-btn" id="copyBtn" type="button" aria-label="Copy image" title="Copy image" disabled>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2" /><path d="M16 8V3H3v13h5" /></svg>
+            </button>
+          </div>
+          <span class="visually-hidden" id="copyStatus" role="status" aria-live="polite"></span>
+        </section>
       </aside>
 
       <main class="stage-area" aria-label="The same picture at each stage">
         <div class="stage-bar">
-          <button class="side-btn" id="sideBtn" type="button" aria-pressed="false">
-            Side by side
+          <div class="stage-views" role="group" aria-label="View stage">
+            <button class="view-btn" type="button" data-show="photo" aria-label="Photo" aria-pressed="false">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8" cy="8" r="1.5" /><path d="m3 17 5-5 4 4 4-6 5 6" /></svg>
+            </button>
+            <button class="view-btn" type="button" data-show="tones" aria-label="Tones" aria-pressed="false">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor" fill-opacity="0.1" /><rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor" fill-opacity="0.3" /><rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor" fill-opacity="0.5" /><rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor" fill-opacity="0.8" /></svg>
+            </button>
+            <button class="view-btn" type="button" data-show="graph" aria-label="Graph" aria-pressed="false">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="5" r="2" /><circle cx="19" cy="5" r="2" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="19" r="2" /><path d="M7 5h10M5 7v10M7 19h10M19 7v10M6.5 6.5l11 11" /></svg>
+            </button>
+            <button class="view-btn" type="button" data-show="maze" aria-label="Maze" aria-pressed="false">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3V9h6V3m0 6h6v6h6M9 21v-6h6" /></svg>
+            </button>
+          </div>
+          <button class="view-btn" id="sideBtn" type="button" aria-label="Side by side" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7.5 4v16M12 4v16M16.5 4v16" /></svg>
           </button>
         </div>
         <div class="band" id="band" data-focus="photo">

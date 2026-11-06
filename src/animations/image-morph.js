@@ -37,6 +37,8 @@ async function morph(canvas, source, maze, token, onPhase, tween, wait) {
 
   // 1. The photo pixelates down to the tone grid.
   onPhase("photo");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, 0, 0, width, height);
   const mosaic = document.createElement("canvas");
   const mctx = mosaic.getContext("2d", { willReadFrequently: true });
   const startCols = Math.max(cols, Math.round(width / 2));

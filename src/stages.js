@@ -263,6 +263,7 @@ export function createRenderer({
   handles,
   morphTag,
   onFocusChange,
+  onIntroEnd = () => {},
   animation = stageWipeAnimation,
 }) {
   const { nextRun, tween, wait } = createTimeline();
@@ -287,6 +288,7 @@ export function createRenderer({
     nextRun();
     band.classList.remove("is-morphing");
     band.dataset.animation = "idle";
+    onIntroEnd();
     if (!state.maze) return;
     clearCanvas(overlay);
     drawAll(state, view);
@@ -341,6 +343,7 @@ export function createRenderer({
     if (!finished) return;
     strip.focus("maze", { instant: true });
     band.dataset.animation = "finished";
+    onIntroEnd();
   }
 
   // Settings changed: redraw the early stages and carve again in place.

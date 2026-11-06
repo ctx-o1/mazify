@@ -35,6 +35,7 @@ function nextSeed() {
 }
 
 const controls = getControls();
+const app = document.querySelector(".app");
 controls.band.dataset.variant = animation.name;
 const state = {
   source: createPresetImage(),
@@ -57,6 +58,7 @@ const renderer = createRenderer({
   morphTag: controls.morphTag,
   animation,
   onFocusChange: (name) => showFocus(controls, name),
+  onIntroEnd: () => app.classList.add("controls-ready"),
 });
 
 function viewOptions() {
@@ -69,7 +71,11 @@ let buildTimer;
 let resizeTimer;
 
 function draw() {
-  renderer.renderStatic(state, viewOptions());
+  if (controls.band.dataset.animation === "running") {
+    renderer.intro(state, viewOptions());
+  } else {
+    renderer.renderStatic(state, viewOptions());
+  }
 }
 
 function finishBuild(maze, from) {
@@ -82,7 +88,10 @@ function finishBuild(maze, from) {
   showSource(controls, state.fileLabel);
   setControlsEnabled(controls, true);
   const view = viewOptions();
-  if (from === "photo") renderer.intro(state, view);
+  if (from === "photo") {
+    app.classList.remove("controls-ready");
+    renderer.intro(state, view);
+  }
   else if (from === "maze") renderer.recarve(state, view);
   else renderer.update(state, view);
 }
@@ -209,4 +218,15 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(draw, 120);
 });
 setControlsEnabled(controls, false);
+const sampleImage = new Image();
+sampleImage.src = `${import.meta.env.BASE_URL}examples/birth-of-venus.jpg`;
+try {
+  await sampleImage.decode();
+  if (state.fileLabel === "preset") {
+    state.source = sampleImage;
+    state.fileLabel = "The Birth of Venus · Sandro Botticelli";
+  }
+} catch (error) {
+  console.error("Could not load the sample painting.", error);
+}
 rebuild("photo", { newSeed: true });

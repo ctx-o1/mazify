@@ -47,7 +47,14 @@ body {
 
 body {
   min-height: 100vh;
-  background: var(--ground) url("/backgrounds/light-oil-painting.jpg") center / cover fixed no-repeat;
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(rgba(243, 239, 229, 0.5), rgba(243, 239, 229, 0.5)),
+    url("/backgrounds/light-oil-painting.jpg");
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--on-ground);
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-size: 14px;
@@ -75,6 +82,7 @@ output {
   gap: 18px var(--column-gap);
   width: calc(300px + var(--column-gap) + var(--stage-width) + var(--gutter) * 2);
   padding: var(--gutter);
+  padding-top: 24px;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -92,33 +100,58 @@ output {
   justify-items: start;
 }
 
-.steps {
+.settings {
   grid-area: 2 / 1;
 }
 
-.brand {
-  width: 100%;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
+.intro,
+.settings,
+.stage-bar {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition:
+    opacity 450ms ease,
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wordmark {
-  margin: 0;
-  font-family: "Unbounded", sans-serif;
-  font-size: clamp(28px, 2.4vw, 32px);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.03em;
+.controls-ready :is(.intro, .settings, .stage-bar) {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.controls-ready .settings {
+  transition-delay: 100ms;
+}
+
+.controls-ready .stage-bar {
+  transition-delay: 180ms;
+}
+
+.app:not(.controls-ready) .band {
+  translate: calc((300px + var(--column-gap)) / -2) 0;
+}
+
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px var(--gutter);
 }
 
 .github-link {
-  color: var(--on-ground);
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-ground-muted);
+  font-size: 12px;
+  font-weight: 500;
   text-decoration: underline;
   text-decoration-color: var(--signal);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
 
@@ -160,13 +193,17 @@ body.dragging .drop-overlay {
 }
 
 @media (max-width: 900px) {
+  .app:not(.controls-ready) .band {
+    translate: none;
+  }
+
   .app {
     grid-template-columns: minmax(0, 1fr);
     width: calc(var(--stage-width) + var(--gutter) * 2);
     row-gap: 12px;
   }
 
-  .steps {
+  .settings {
     grid-area: 4 / 1;
   }
 }

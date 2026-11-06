@@ -18,9 +18,9 @@ The colour treatment affects drawing after brightness has been sampled.
 
 | Setting | Both examples |
 | --- | --- |
-| Source image | The generated landscape from `createPresetImage()` in `src/maze.js` |
+| Source image | Sandro Botticelli’s *The Birth of Venus* from `public/examples/birth-of-venus.jpg` |
 | Grid columns | 36 |
-| Grid rows | Follow the image aspect ratio, giving 29 for the default landscape |
+| Grid rows | Follow the image aspect ratio, giving 23 for the default painting |
 | Minimum detail per square | 1 × 1 |
 | Maximum detail per square | 5 × 5 |
 | Contrast | 1.0 |
@@ -57,7 +57,7 @@ batched by colour.
 
 | Stage | Stage wipe | Image morph |
 | --- | --- | --- |
-| Image | Shows the source image | 250 ms initial pause on the cleared morph canvas |
+| Image | Shows the source image | Shows the source image for 250 ms before pixelation |
 | Pixelation | Included in the static tones stage | Pixels enlarge into coarse squares over 1.2 s |
 | Tones | Wipes to the tonal grid over 0.95 s | Colours drain to light/dark tones over 1 s, followed by a 220 ms pause |
 | Points | Included in the static graph stage | Squares shrink and spread into dots over 1.1 s |
@@ -71,7 +71,6 @@ wipe. Both maze-construction sequences take 2–3.4 s according to graph size an
 show an orange head with a short trailing path. Their final internal pauses are
 450 ms for Stage wipe and 500 ms for Image morph.
 
-The initial 250 ms pause in Image morph is currently visible as a blank lead-in.
 With reduced motion enabled, both variants show the finished maze immediately.
 
 ## Shared implementation
