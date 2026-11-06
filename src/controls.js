@@ -117,28 +117,38 @@ export function bindControls(
   const hasFiles = (event) =>
     Array.from(event.dataTransfer?.types || []).includes("Files");
 
-  document.addEventListener("dragenter", (event) => {
+  const resetDrag = () => {
+    dragDepth = 0;
+    document.body.classList.remove("dragging");
+  };
+
+  window.addEventListener("dragenter", (event) => {
     if (!hasFiles(event)) return;
     event.preventDefault();
     dragDepth += 1;
     document.body.classList.add("dragging");
-  });
-  document.addEventListener("dragover", (event) => {
+  }, true);
+  window.addEventListener("dragover", (event) => {
     if (!hasFiles(event)) return;
     event.preventDefault();
+    document.body.classList.add("dragging");
     event.dataTransfer.dropEffect = "copy";
-  });
-  document.addEventListener("dragleave", () => {
+  }, true);
+  window.addEventListener("dragleave", (event) => {
+    if (!hasFiles(event)) return;
     dragDepth = Math.max(0, dragDepth - 1);
-    if (dragDepth === 0) document.body.classList.remove("dragging");
-  });
-  document.addEventListener("drop", (event) => {
+    if (dragDepth === 0) resetDrag();
+  }, true);
+  window.addEventListener("drop", (event) => {
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (!hasFiles(event) && files.length === 0) return;
     event.preventDefault();
-    dragDepth = 0;
-    document.body.classList.remove("dragging");
-    const [file] = event.dataTransfer?.files || [];
+    resetDrag();
+    const file = files.find((candidate) => candidate.type.startsWith("image/"));
     if (file) onFile(file);
-  });
+  }, true);
+  window.addEventListener("dragend", resetDrag, true);
+  window.addEventListener("blur", resetDrag);
   controls.fileInput.addEventListener("change", () => {
     const [file] = controls.fileInput.files || [];
     if (file) onFile(file);
