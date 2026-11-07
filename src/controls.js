@@ -6,11 +6,13 @@ const elementIds = [
   "replaceBtn",
   "colsRange",
   "colsVal",
+  "autoResolutionBtn",
   "resRange",
   "resVal",
   "contrastRange",
   "contrastVal",
   "invertToggle",
+  "originalPathsToggle",
   "solutionToggle",
   "structureToggle",
   "colorToggle",
@@ -56,6 +58,7 @@ export function readMazeOptions(controls) {
 
 export function readViewOptions(controls) {
   return {
+    showWalls: !controls.originalPathsToggle.checked,
     showSolution: controls.solutionToggle.checked,
     showStructure: controls.structureToggle.checked,
     useColors: controls.colorToggle.checked,
@@ -102,6 +105,7 @@ export function bindControls(
     onFocus,
     onCopy,
     onDownload,
+    onAutoResolution,
   },
 ) {
   let rebuildTimer;
@@ -118,6 +122,7 @@ export function bindControls(
   }
   controls.sideBtn.addEventListener("click", () => onFocus("all"));
   controls.replaceBtn.addEventListener("click", openFilePicker);
+  controls.autoResolutionBtn.addEventListener("click", onAutoResolution);
 
   const hasFiles = (event) =>
     Array.from(event.dataTransfer?.types || []).includes("Files");
@@ -161,6 +166,7 @@ export function bindControls(
   });
 
   controls.colsRange.addEventListener("input", () => {
+    controls.autoResolutionBtn.setAttribute("aria-pressed", "false");
     controls.colsVal.textContent = controls.colsRange.value;
     scheduleRebuild("tones");
   });
@@ -173,10 +179,15 @@ export function bindControls(
   controls.resRange.addEventListener("input", () => {
     const value = controls.resRange.value;
     controls.resVal.textContent = `${value} × ${value}`;
-    scheduleRebuild("graph");
+    if (controls.autoResolutionBtn.getAttribute("aria-pressed") === "true") {
+      onAutoResolution();
+    } else {
+      scheduleRebuild("graph");
+    }
   });
   controls.invertToggle.addEventListener("change", () => onRebuild("tones"));
   controls.solutionToggle.addEventListener("change", onSolution);
+  controls.originalPathsToggle.addEventListener("change", onDraw);
   controls.structureToggle.addEventListener("change", onDraw);
   controls.colorToggle.addEventListener("change", onDraw);
   controls.regenBtn.addEventListener("click", onRecarve);

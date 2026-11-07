@@ -5,7 +5,9 @@ import {
   fitCanvas,
   mazeLineWidth,
   strokeMazeEdges,
+  wallLineWidth,
 } from "./maze.js";
+import { createWallGroups, strokeWallGroups } from "./walls.js";
 
 import { stageWipeAnimation } from "./animations/stage-wipe.js";
 import { createTimeline, ease } from "./animations/timing.js";
@@ -91,8 +93,7 @@ function drawGraph(canvas, maze) {
   );
 }
 
-// Replays the depth-first walk on top of a faint copy of the graph, with a
-// vermilion comet on the overlay marking where the walk is right now.
+// Replays the walk, opening walls or drawing paths, with a comet marking progress.
 async function carve(canvas, overlay, maze, view, token, duration, tween) {
   const { ctx, cellSize, dpr } = fitCanvas(canvas, maze, MAZE_INSET);
   const octx = matchOverlay(overlay, canvas);
@@ -102,22 +103,29 @@ async function carve(canvas, overlay, maze, view, token, duration, tween) {
   const total = edges.length;
   const signal = cssVar("--signal");
 
-  strokeEdges(ctx, nodes, maze.graph.allEdges, cellSize, cssVar("--underlay"), 0.7);
+  const wallGroups = view.showWalls ? createWallGroups(maze) : null;
+  if (!wallGroups) {
+    strokeEdges(ctx, nodes, maze.graph.allEdges, cellSize, cssVar("--underlay"), 0.7);
+  }
 
   let drawn = 0;
   const finished = await tween(
     duration,
     (progress) => {
       const next = Math.round(total * ease(progress));
-      if (next > drawn) {
-        strokeMazeEdges(
-          ctx,
-          maze,
-          edges.slice(drawn, next),
-          cellSize,
-          view.useColors,
-          lineWidth,
+      if (wallGroups) {
+        clearCanvas(canvas);
+        strokeWallGroups(
+          ctx, wallGroups, cellSize, wallLineWidth(maze, cellSize, lineWidth),
+          view.useColors, cssVar("--line"), next,
         );
+      }
+      if (next > drawn) {
+        if (!wallGroups) {
+          strokeMazeEdges(
+            ctx, maze, edges.slice(drawn, next), cellSize, view.useColors, lineWidth,
+          );
+        }
         drawn = next;
       }
 
@@ -146,7 +154,10 @@ async function traceSolution(canvas, overlay, maze, view, token, tween) {
   const octx = matchOverlay(overlay, canvas);
   const dpr = canvas.width / parseFloat(canvas.style.width);
   const cellSize = (parseFloat(canvas.style.width) - MAZE_INSET * 2) / maze.cols;
-  const lineWidth = mazeLineWidth(maze, cellSize) + 1;
+  const preferredWidth = mazeLineWidth(maze, cellSize) + 1;
+  const lineWidth = view.showWalls
+    ? Math.min(preferredWidth, cellSize / maze.maxRes * 0.4)
+    : preferredWidth;
   const edges = maze.solutionEdges;
   const signal = cssVar("--ember");
 

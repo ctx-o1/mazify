@@ -1,3 +1,5 @@
+import { createWallGroups, strokeWallGroups } from "./walls.js";
+
 function mulberry32(a) {
   return function () {
     a |= 0;
@@ -292,10 +294,7 @@ function sourceAspectRatio(source) {
 
 export function createMaze(source, options, seed = randomSeed()) {
   const cols = options.cols;
-  const rows = Math.max(
-    6,
-    Math.min(72, Math.round(cols * sourceAspectRatio(source))),
-  );
+  const rows = Math.max(1, Math.min(96, Math.round(cols * sourceAspectRatio(source))));
   const sampled = sampleSource(source, cols, rows, options.colorForPixel);
   const graph = buildGraph(sampled.brightness, cols, rows, options);
   if (options.entry) graph.entranceId = nearestNode(graph, options.entry);
@@ -465,17 +464,20 @@ function paintMaze(
     drawStructure(ctx, maze, cellSize, structureWidth);
   }
 
-  strokeMazeEdges(
-    ctx,
-    maze,
-    maze.treeEdges,
-    cellSize,
-    view.useColors,
-    mazeLineWidth,
-  );
+  if (view.showWalls) {
+    strokeWallGroups(
+      ctx, createWallGroups(maze), cellSize, wallLineWidth(maze, cellSize, mazeLineWidth),
+      view.useColors, cssVar("--line"),
+    );
+  } else {
+    strokeMazeEdges(ctx, maze, maze.treeEdges, cellSize, view.useColors, mazeLineWidth);
+  }
 
   if (view.showSolution) {
-    drawSolution(ctx, maze, cellSize, solutionWidth);
+    const width = view.showWalls
+      ? Math.min(solutionWidth, cellSize / maze.maxRes * 0.4)
+      : solutionWidth;
+    drawSolution(ctx, maze, cellSize, width);
   }
 
   if (showPortals) {
@@ -484,19 +486,23 @@ function paintMaze(
       maze.graph.nodes[maze.graph.entranceId],
       cellSize,
       true,
-      portalScale,
+      view.showWalls ? Math.min(portalScale, cellSize / maze.maxRes / 14) : portalScale,
     );
     drawPortal(
       ctx,
       maze.graph.nodes[maze.graph.exitId],
       cellSize,
       false,
-      portalScale,
+      view.showWalls ? Math.min(portalScale, cellSize / maze.maxRes / 14) : portalScale,
     );
   }
 }
 
 export const MAZE_INSET = 0;
+
+export function wallLineWidth(maze, cellSize, preferred) {
+  return Math.min(preferred, cellSize / maze.maxRes * 0.45);
+}
 
 export function mazeLineWidth(maze, cellSize) {
   const corridor = cellSize / Math.max(1, maze.maxRes);

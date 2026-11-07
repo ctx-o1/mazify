@@ -1,7 +1,3 @@
-import "./styles/base.css";
-import "./styles/maze.css";
-import "./styles/controls.css";
-
 import {
   createMaze,
   createMazeExport,
@@ -65,6 +61,21 @@ function viewOptions() {
   return { ...readViewOptions(controls), lineWidth: animation.lineWidth };
 }
 
+function applyAutoResolution() {
+  const { source } = state;
+  const width = source.naturalWidth || source.width;
+  const height = source.naturalHeight || source.height;
+  document.documentElement.style.setProperty("--aspect", String(width / height));
+  const bounds = controls.band.getBoundingClientRect();
+  const longestSide = Math.min(Math.max(width, height), Math.max(bounds.width, bounds.height));
+  const mazeDetail = Number(controls.resRange.value);
+  // Aim for three CSS pixels per room at the densest subdivision.
+  const resolution = Math.max(24, Math.min(96, Math.round(longestSide / (3 * mazeDetail) / 8) * 8));
+  controls.colsRange.value = String(resolution);
+  controls.colsVal.textContent = String(resolution);
+  controls.autoResolutionBtn.setAttribute("aria-pressed", "true");
+}
+
 const BUILD_DELAY_MS = 20;
 
 let buildTimer;
@@ -91,8 +102,7 @@ function finishBuild(maze, from) {
   if (from === "photo") {
     app.classList.remove("controls-ready");
     renderer.intro(state, view);
-  }
-  else if (from === "maze") renderer.recarve(state, view);
+  } else if (from === "maze") renderer.recarve(state, view);
   else renderer.update(state, view);
 }
 
@@ -116,6 +126,9 @@ function rebuild(from = "photo", { newSeed = false } = {}) {
     ...readMazeOptions(controls),
     colorForPixel: animation.colorForPixel,
   };
+  const width = source.naturalWidth || source.width;
+  const height = source.naturalHeight || source.height;
+  options.cols = Math.max(1, Math.round(options.cols * Math.min(1, width / height)));
   const seed = newSeed ? nextSeed() : state.seed;
   scheduleBuild(() => createMaze(source, options, seed), from);
 }
@@ -138,6 +151,7 @@ function loadImageFile(file) {
   image.onload = () => {
     state.source = image;
     state.fileLabel = file.name;
+    applyAutoResolution();
     URL.revokeObjectURL(url);
     rebuild("photo", { newSeed: true });
   };
@@ -211,6 +225,10 @@ bindControls(controls, {
   onFocus: (name) => renderer.focus(name),
   onCopy: copy,
   onDownload: download,
+  onAutoResolution: () => {
+    applyAutoResolution();
+    rebuild("tones");
+  },
 });
 
 window.addEventListener("resize", () => {
@@ -219,14 +237,15 @@ window.addEventListener("resize", () => {
 });
 setControlsEnabled(controls, false);
 const sampleImage = new Image();
-sampleImage.src = `${import.meta.env.BASE_URL}examples/birth-of-venus.jpg`;
+sampleImage.src = `${import.meta.env.BASE_URL}examples/mona-lisa.webp`;
 try {
   await sampleImage.decode();
   if (state.fileLabel === "preset") {
     state.source = sampleImage;
-    state.fileLabel = "The Birth of Venus · Sandro Botticelli";
+    state.fileLabel = "Example image";
   }
 } catch (error) {
-  console.error("Could not load the sample painting.", error);
+  console.error("Could not load the sample image.", error);
 }
+applyAutoResolution();
 rebuild("photo", { newSeed: true });

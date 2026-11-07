@@ -1,7 +1,7 @@
 import "./draft.css";
 
 import { createMaze, randomSeed, recarveMaze } from "../maze.js";
-import { edgeKey, wallsOf } from "./walls.js";
+import { edgeKey, wallsOf } from "../walls.js";
 
 // Public domain, served by Wikimedia Commons with CORS enabled so the
 // canvas can read its pixels.

@@ -46,6 +46,31 @@
   font-weight: 500;
 }
 
+.field-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auto-resolution {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--on-ground-muted);
+  cursor: pointer;
+}
+
+.auto-resolution:hover,
+.auto-resolution[aria-pressed="true"] {
+  background: rgba(48, 69, 55, 0.08);
+  color: var(--on-ground);
+}
+
 .field output {
   color: var(--on-ground-muted);
   font-variant-numeric: tabular-nums;

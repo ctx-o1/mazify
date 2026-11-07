@@ -3,6 +3,50 @@
 // ============================================================
 export const edgeKey = (n, a, b) => (a < b ? a * n + b : b * n + a);
 
+export function createWallGroups(maze) {
+  const { graph, cols, rows, colors, treeEdges } = maze;
+  const nodeCount = graph.nodes.length;
+  const removedAt = new Map(
+    treeEdges.map(([a, b], index) => [edgeKey(nodeCount, a, b), index]),
+  );
+  const groups = new Map();
+  for (const segment of wallsOf(graph).segments) {
+    const col = Math.max(0, Math.min(cols - 1, Math.floor((segment.x1 + segment.x2) / 2)));
+    const row = Math.max(0, Math.min(rows - 1, Math.floor((segment.y1 + segment.y2) / 2)));
+    const color = colors[row][col];
+    if (!groups.has(color)) groups.set(color, []);
+    groups.get(color).push({
+      ...segment,
+      removedAt: removedAt.get(segment.key) ?? Infinity,
+    });
+  }
+  return groups;
+}
+
+export function strokeWallGroups(
+  ctx,
+  groups,
+  cellSize,
+  lineWidth,
+  useColors,
+  lineColor,
+  openedCount = Infinity,
+) {
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = "butt";
+  ctx.lineJoin = "miter";
+  for (const [color, segments] of groups) {
+    ctx.strokeStyle = useColors ? color : lineColor;
+    ctx.beginPath();
+    for (const segment of segments) {
+      if (segment.removedAt < openedCount) continue;
+      ctx.moveTo(segment.x1 * cellSize, segment.y1 * cellSize);
+      ctx.lineTo(segment.x2 * cellSize, segment.y2 * cellSize);
+    }
+    ctx.stroke();
+  }
+}
+
 export function wallsOf(graph) {
   if (graph.walls) return graph.walls;
   const { cellNodeIndex, cols, rows, nodes, entranceId, exitId } = graph;

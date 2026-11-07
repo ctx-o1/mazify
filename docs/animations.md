@@ -18,11 +18,11 @@ The colour treatment affects drawing after brightness has been sampled.
 
 | Setting | Both examples |
 | --- | --- |
-| Source image | Sandro Botticelli’s *The Birth of Venus* from `public/examples/birth-of-venus.jpg` |
-| Grid columns | 36 |
-| Grid rows | Follow the image aspect ratio, giving 23 for the default painting |
+| Source image | Mona Lisa from `public/examples/mona-lisa.webp` |
+| Image resolution | Automatically chosen on image load, with a manual range of 24–96 samples on the longer side |
+| Grid rows | Follow the image aspect ratio, capped at 96 |
 | Minimum detail per square | 1 × 1 |
-| Maximum detail per square | 5 × 5 |
+| Maximum detail per square | 3 × 3 by default |
 | Contrast | 1.0 |
 | Invert | Off |
 | Photo colours | On |
@@ -35,6 +35,19 @@ without the app controls. Regular app visits and new-maze generation use random
 seeds. With matching source, generation settings, and seed, both variants produce
 the same maze topology.
 
+Automatic resolution uses the smaller of the source image’s longest side and
+its displayed longest side. It targets three CSS pixels per room at the selected
+maximum subdivision, rounds the image sampling count to a multiple of eight,
+and bounds it to 24–96. The Auto button recalculates this value. Moving the image
+resolution slider switches to manual control. Changing maze detail recalculates
+resolution while Auto is selected.
+
+The main app draws coloured walls around the passages. Each tree connection
+opens the shared wall between its two rooms. Screen and export wall thickness
+is capped at 45% of the smallest room width. The solution follows the original
+tree through these passages. The rendering helpers also support the earlier
+coloured-path treatment through the view options.
+
 ## Rendering differences
 
 The current comparison varies appearance as well as motion. Each version keeps
@@ -43,7 +56,7 @@ the rendering treatment it had when the two examples were selected.
 | Rendering | Stage wipe | Image morph |
 | --- | --- | --- |
 | Line weight | Thinner | Thicker |
-| Screen line width | `clamp(corridor × 0.42, 0.9, 2.4)` | `clamp(corridor × 0.6, 1, 3.4)` |
+| Preferred screen line width | `clamp(corridor × 0.42, 0.9, 2.4)` | `clamp(corridor × 0.6, 1, 3.4)` |
 | Colour mapping | Luminance-scaled RGB with channels quantized in steps of 16 | HSL with saturation boosted by 30% and lightness compressed to a dark ink range |
 | Appearance | More muted | More saturated |
 | Export line width | 3.2 px | Corridor-based width, capped at 12 px |
@@ -52,6 +65,8 @@ Here, `corridor` is the rendered grid-cell size divided by the maximum detail
 per square. Line widths are in CSS pixels on screen and output pixels in exports.
 The HSL mapping also quantizes hue, saturation, and lightness so strokes can be
 batched by colour.
+
+The wall-width cap above also applies to these preferred widths.
 
 ## Keyframes and timing
 
@@ -62,8 +77,8 @@ batched by colour.
 | Tones | Wipes to the tonal grid over 0.95 s | Colours drain to light/dark tones over 1 s, followed by a 220 ms pause |
 | Points | Included in the static graph stage | Squares shrink and spread into dots over 1.1 s |
 | Connected graph | Wipes to the graph over 0.95 s | Links grow between dots over 1 s |
-| Maze preparation | Wipes to the maze canvas over 0.95 s | Switches to the maze canvas and a faint graph |
-| Maze construction | Draws coloured paths over the faint graph | Draws coloured paths over the faint graph |
+| Maze preparation | Wipes to the maze canvas over 0.95 s | Switches to the maze canvas |
+| Maze construction | Opens passages through coloured walls | Opens passages through coloured walls |
 | Final frame | Holds the completed maze full frame | Holds the completed maze full frame |
 
 Stage wipe waits 500 ms before its first wipe and 250 ms before each subsequent
@@ -81,6 +96,8 @@ With reduced motion enabled, both variants show the finished maze immediately.
   selection.
 - `src/maze.js` handles generation and export. The selected variant can supply
   its colour mapping and line-width calculation.
+- `src/walls.js` builds the room boundaries and draws the remaining walls. The
+  draft uses the same boundary geometry.
 
 `draft.html` is a separate experiment with its own painting, generation settings,
 wall-carving sequence, and dark presentation. The side-by-side comparison uses
